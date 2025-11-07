@@ -1,0 +1,48 @@
+{
+  "tests": [
+    {
+      "name": "Send code to special phone",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "send_code",
+        "phone": "+888 8888 88"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "message": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Send code to regular phone",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "send_code",
+        "phone": "+7 999 123 45 67"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Verify code",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "verify_code",
+        "phone": "+7 999 123 45 67",
+        "code": "12345"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

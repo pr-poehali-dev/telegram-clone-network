@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
+
+const AUTH_API = 'https://functions.poehali.dev/c9a0277e-ae62-4e24-a830-16d46d176b38';
 
 interface AuthScreenProps {
   onAuthSuccess: (phone: string) => void;
@@ -12,25 +15,74 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    setTimeout(() => {
-      setStep('code');
+    try {
+      const response = await fetch(AUTH_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send_code', phone })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        toast({
+          title: 'Код отправлен',
+          description: data.message
+        });
+        setStep('code');
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось отправить код',
+        variant: 'destructive'
+      });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const handleCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    setTimeout(() => {
-      onAuthSuccess(phone);
+    try {
+      const response = await fetch(AUTH_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify_code', phone, code })
+      });
+      
+      const data = await response.json();
+      
+      if (data.verified) {
+        toast({
+          title: 'Успешно!',
+          description: 'Добро пожаловать в Telegram'
+        });
+        onAuthSuccess(phone);
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: 'Неверный код',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось проверить код',
+        variant: 'destructive'
+      });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
