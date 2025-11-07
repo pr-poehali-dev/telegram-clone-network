@@ -6,6 +6,7 @@ interface MessengerScreenProps {
   user: {
     phone: string;
     name: string;
+    userId: string;
   };
 }
 
@@ -32,7 +33,7 @@ export interface Message {
 }
 
 export default function MessengerScreen({ user }: MessengerScreenProps) {
-  const [selectedChatId, setSelectedChatId] = useState<string | null>('1');
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
 
   const initialChats: Chat[] = [
     {

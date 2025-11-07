@@ -12,8 +12,14 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Dict, Any
 import os
+import psycopg2
 
 codes_storage: Dict[str, str] = {}
+
+def get_db_connection():
+    '''Создать подключение к БД'''
+    dsn = os.environ.get('DATABASE_URL')
+    return psycopg2.connect(dsn)
 
 def send_email_code(email: str, code: str) -> bool:
     smtp_host = os.environ.get('SMTP_HOST')
@@ -112,6 +118,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             if stored_code and stored_code == code:
                 del codes_storage[phone]
+                
+                conn = get_db_connection()
+                cur = conn.cursor()
+                
+                cur.execute('''
+                    INSERT INTO users (phone, username, created_at)
+                    VALUES (%s, %s, NOW())
+                    ON CONFLICT (phone) DO UPDATE SET last_seen = NOW()
+                    RETURNING id
+                ''', (phone, phone))
+                
+                user_id = cur.fetchone()[0]
+                conn.commit()
+                cur.close()
+                conn.close()
+                
                 return {
                     'statusCode': 200,
                     'headers': {
@@ -122,6 +144,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({
                         'success': True,
                         'verified': True,
+                        'user_id': user_id,
                         'phone': phone
                     })
                 }

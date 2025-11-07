@@ -1,0 +1,17 @@
+{
+  "tests": [
+    {
+      "name": "Get user chats (empty)",
+      "method": "GET",
+      "path": "/?action=get_chats",
+      "headers": {
+        "X-User-Id": "999"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "chats": []
+      },
+      "bodyMatcher": "exact"
+    }
+  ]
+}

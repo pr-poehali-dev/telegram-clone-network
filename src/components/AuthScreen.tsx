@@ -7,7 +7,7 @@ import Icon from '@/components/ui/icon';
 const AUTH_API = 'https://functions.poehali.dev/c9a0277e-ae62-4e24-a830-16d46d176b38';
 
 interface AuthScreenProps {
-  onAuthSuccess: (phone: string) => void;
+  onAuthSuccess: (phone: string, userId: string) => void;
 }
 
 export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
@@ -66,7 +66,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
           title: 'Успешно!',
           description: 'Добро пожаловать в Telegram'
         });
-        onAuthSuccess(phone);
+        onAuthSuccess(phone, data.user_id.toString());
       } else {
         toast({
           title: 'Ошибка',
